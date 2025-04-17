@@ -11,7 +11,50 @@ import {
   loadSection,
   loadSections,
   loadCSS,
+  decorateBlock,
 } from './aem.js';
+
+/**
+ * Checks if link text includes the href value
+ * @param {Element} link The link element to check
+ * @returns {boolean} True if the link text includes the href
+ */
+export function linkTextIncludesHref(link) {
+  const href = link.getAttribute('href');
+  const textcontent = link.textContent;
+  return textcontent.includes(href);
+}
+
+export const PRODUCTION_DOMAINS = ['aem.live'];
+const domainCheckCache = {};
+
+/**
+ * Checks a url to determine if it is a known domain.
+ * @param {string | URL} url the url to check
+ * @returns {Object} an object with properties indicating the urls domain types.
+ */
+export function checkDomain(url) {
+  const urlToCheck = typeof url === 'string' ? new URL(url) : url;
+  let result = domainCheckCache[urlToCheck.hostname];
+  if (!result) {
+    const isProd = PRODUCTION_DOMAINS.some((host) => urlToCheck.hostname.includes(host));
+    const isHlx = ['aem.page', 'aem.live'].some((host) => urlToCheck.hostname.includes(host));
+    const isLocal = urlToCheck.hostname.includes('localhost');
+    const isPreview = isLocal || urlToCheck.hostname.includes('aem.page');
+    const isKnown = isProd || isHlx || isLocal;
+    const isExternal = !isKnown;
+    result = {
+      isProd,
+      isHlx,
+      isLocal,
+      isKnown,
+      isExternal,
+      isPreview,
+    };
+    domainCheckCache[urlToCheck.hostname] = result;
+  }
+  return result;
+}
 
 /**
  * Builds hero block and prepends to main in a new section.
@@ -26,6 +69,28 @@ function buildHeroBlock(main) {
     section.append(buildBlock('hero', { elems: [picture, h1] }));
     main.prepend(section);
   }
+}
+
+/**
+ * Builds fragment blocks from links to fragments
+ * @param {Element} main The container element
+ */
+export function buildFragmentBlocks(main) {
+  main.querySelectorAll('a[href]').forEach((a) => {
+    try {
+      const url = new URL(a.href);
+      const domainCheck = checkDomain(url);
+      // don't autoblock the header navigation currently in fragments
+      if (domainCheck.isKnown && linkTextIncludesHref(a) && (url.pathname.includes('/fragments/') && !url.pathname.includes('header/'))) {
+        const block = buildBlock('fragment', url.pathname);
+        a.replaceWith(block);
+        decorateBlock(block);
+      }
+    } catch (error) {
+    // eslint-disable-next-line no-console
+      console.error('Error processing fragment link', error);
+    }
+  });
 }
 
 /**
@@ -47,6 +112,7 @@ async function loadFonts() {
 function buildAutoBlocks(main) {
   try {
     buildHeroBlock(main);
+    buildFragmentBlocks(main);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Auto Blocking failed', error);
@@ -80,7 +146,6 @@ async function loadEager(doc) {
     document.body.classList.add('appear');
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
-
   try {
     /* if desktop (proxy for fast connection) or fonts already loaded, load fonts.css */
     if (window.innerWidth >= 900 || sessionStorage.getItem('fonts-loaded')) {
@@ -98,14 +163,11 @@ async function loadEager(doc) {
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
   await loadSections(main);
-
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
   if (hash && element) element.scrollIntoView();
-
   loadHeader(doc.querySelector('header'));
   loadFooter(doc.querySelector('footer'));
-
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   loadFonts();
 }
