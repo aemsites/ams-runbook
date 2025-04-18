@@ -11,7 +11,7 @@ const createServerDetailsElement = (placeholders, envInfo) => {
   details.classList.add('server-item');
 
   // Display basic server details
-  ['Name', 'Topology', 'PublicIP', 'PrivateIP', 'Dns', 'AvailabilityZone', 'CurrentSize', 'ContractSize'].forEach((field) => {
+  ['topology', 'name', 'url', 'target', 'notes'].forEach((field) => {
     if (envInfo[field] === undefined || envInfo[field] === null) {
       return;
     }
