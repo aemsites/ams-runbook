@@ -1,101 +1,192 @@
 import { fetchPlaceholders, getMetadata } from '../../scripts/aem.js';
 
 /**
- * Generate HTML for displaying a single server's details
- * @param {Object} placeholders Translation placeholders (may be empty)
- * @param {Object} envInfo Server information object
- * @returns {HTMLElement} Server details element
+ * Format a value for display, with special handling for URLs, emails, and multiline text
+ * @param {string} value - The value to display
+ * @param {string} fieldName - The name of the field being displayed
+ * @returns {string} - The formatted value
  */
-const createServerDetailsElement = (placeholders, envInfo) => {
-  const details = document.createElement('div');
-  details.classList.add('server-item');
-
-  // Display basic server details
-  ['topology', 'name', 'url', 'target', 'notes'].forEach((field) => {
-    if (envInfo[field] === undefined || envInfo[field] === null) {
-      return;
-    }
-
-    // Use placeholder if available, otherwise use the field name
-    let label;
-    if (placeholders && placeholders[field.toLowerCase()]) {
-      label = placeholders[field.toLowerCase()];
-    } else {
-      label = field;
-    }
-    const fieldDiv = document.createElement('div');
-    fieldDiv.classList.add('details-item');
-    fieldDiv.innerHTML = `
-      <div class="label"><strong>${label}:</strong></div>
-      <div class="data">${envInfo[field]}</div>
-    `;
-    details.appendChild(fieldDiv);
-  });
-
-  // Handle Notes field separately if it contains multiline content
-  if (envInfo.Notes) {
-    const field = 'Notes';
-    let label;
-    if (placeholders && placeholders[field.toLowerCase()]) {
-      label = placeholders[field.toLowerCase()];
-    } else {
-      label = field;
-    }
-    const fieldDiv = document.createElement('div');
-    fieldDiv.classList.add('details-item', 'notes');
-
-    // Check if Notes contains multiple lines
-    if (envInfo.Notes.includes('\n')) {
-      const ul = document.createElement('ul');
-
-      envInfo.Notes.split(/\r?\n|\r|\n/g).forEach((line) => {
-        if (line.trim() !== '') {
-          const li = document.createElement('li');
-          li.textContent = line;
-          ul.appendChild(li);
-        }
-      });
-
-      fieldDiv.innerHTML = `
-        <div class="label"><strong>${label}:</strong></div>
-        <div class="data">${ul.outerHTML}</div>
-      `;
-    } else {
-      fieldDiv.innerHTML = `
-        <div class="label"><strong>${label}:</strong></div>
-        <div class="data">${envInfo.Notes}</div>
-      `;
-    }
-
-    details.appendChild(fieldDiv);
+const formatValue = (value, fieldName) => {
+  if (value === undefined || value === null || value === '') {
+    return '';
   }
 
-  return details;
+  // Handle URL fields - make them clickable links
+  if (fieldName === 'url' && value) {
+    try {
+      // Validate URL and create link
+      const url = new URL(value);
+      return `<a href="${url.href}" target="_blank" rel="noopener noreferrer">${value}</a>`;
+    } catch (e) {
+      // If URL is invalid, just return the text
+      return value;
+    }
+  }
+
+  // Handle email fields - make them mailto links
+  if (fieldName === 'email' && value) {
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(value)) {
+      return `<a href="mailto:${value}">${value}</a>`;
+    }
+    return value;
+  }
+
+  // Handle multiline notes
+  if (typeof value === 'string' && value.includes('\n')) {
+    const lines = value.split(/\r?\n|\r|\n/g)
+      .filter((line) => line.trim() !== '')
+      .map((line) => `<li>${line}</li>`)
+      .join('');
+
+    return `<ul>${lines}</ul>`;
+  }
+
+  return value;
 };
 
 /**
- * Generate HTML for displaying all servers
- * @param {Object} placeholders Translation placeholders
- * @param {Array} serversData Array of server information objects
- * @returns {string} HTML string
+ * Create a section for a data table
+ * @param {Object} placeholders - Translation placeholders
+ * @param {Array} items - Data items to display
+ * @param {Object} config - Configuration for this data type
+ * @returns {HTMLElement} - The created section
  */
-const serversHtml = (placeholders, serversData) => {
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('servers-wrapper');
+const createDataSection = (placeholders, items, config) => {
+  const section = document.createElement('div');
+  section.classList.add(`${config.type}-section`);
 
-  serversData.forEach((envInfo) => {
-    const serverElement = createServerDetailsElement(placeholders, envInfo);
-    wrapper.appendChild(serverElement);
+  // Add section title if provided
+  if (config.sectionTitle) {
+    const title = document.createElement('h4');
+    title.classList.add('section-title');
+    title.textContent = config.sectionTitle;
+    section.appendChild(title);
+  }
 
-    // Add separator between servers (except after the last one)
-    if (envInfo !== serversData[serversData.length - 1]) {
-      const separator = document.createElement('hr');
-      separator.classList.add('server-separator');
-      wrapper.appendChild(separator);
+  // Create table element
+  const table = document.createElement('table');
+  table.classList.add(`${config.type}-table`, 'data-table');
+  section.appendChild(table);
+
+  // Create table header
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
+  config.displayFields.forEach((field) => {
+    const th = document.createElement('th');
+    th.textContent = placeholders[field.toLowerCase()] || field;
+    headerRow.appendChild(th);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create table body
+  const tbody = document.createElement('tbody');
+
+  items.forEach((item) => {
+    const row = document.createElement('tr');
+
+    config.displayFields.forEach((field) => {
+      const td = document.createElement('td');
+      td.innerHTML = formatValue(item[field], field);
+      row.appendChild(td);
+    });
+
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
+
+  return section;
+};
+
+/**
+ * Fetches data from a URL and processes it
+ * @param {string} url - The URL to fetch data from
+ * @returns {Promise<Array>} - The fetched data
+ */
+const fetchData = async (url) => {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+  }
+
+  const json = await response.json();
+
+  if (!json.data || !Array.isArray(json.data)) {
+    throw new Error('Invalid data format: expected json.data array');
+  }
+
+  return json.data;
+};
+
+/**
+ * Process a single data source
+ * @param {string} dataType - Type of data being processed
+ * @param {string} url - URL to fetch data from
+ * @param {Object} config - Configuration for this data type
+ * @param {Object} placeholders - Translation placeholders
+ * @returns {HTMLElement} - Processed section element
+ */
+const processDataSource = async (dataType, url, config, placeholders) => {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const data = await fetchData(url);
+
+    if (data.length === 0) {
+      const emptyMessage = document.createElement('div');
+      emptyMessage.classList.add('note-message');
+      emptyMessage.textContent = `No ${dataType} information available.`;
+      return emptyMessage;
+    }
+
+    return createDataSection(placeholders, data, config);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Error fetching ${dataType} data:`, error);
+    const errorMessage = document.createElement('div');
+    errorMessage.classList.add('error-message');
+    errorMessage.textContent = `Error loading ${dataType} details: ${error.message}`;
+    return errorMessage;
+  }
+};
+
+/**
+ * Processes all data sources sequentially
+ * @param {Object} dataUrls - Object containing URLs for different data types
+ * @param {Object} dataConfigs - Configurations for each data type
+ * @param {Object} placeholders - Translation placeholders
+ * @returns {Promise<Array>} - Array of processed data sections
+ */
+const processAllDataSources = async (dataUrls, dataConfigs, placeholders) => {
+  const results = [];
+  const dataTypes = Object.keys(dataUrls);
+
+  // Use Promise.all to process data sources in parallel
+  const sectionPromises = dataTypes.map((dataType) => processDataSource(
+    dataType,
+    dataUrls[dataType],
+    dataConfigs[dataType],
+    placeholders,
+  ));
+
+  const sections = await Promise.all(sectionPromises);
+
+  // Filter out null results and add valid sections to results
+  sections.forEach((section) => {
+    if (section) {
+      results.push(section);
     }
   });
 
-  return wrapper.outerHTML;
+  return results;
 };
 
 export default async function decorate(block) {
@@ -110,44 +201,66 @@ export default async function decorate(block) {
     console.warn('Failed to load placeholders, using default field names instead');
   }
 
-  // Get server data URL
-  let serverDataUrl;
+  // Define data configurations
+  const dataConfigs = {
+    vitalSys: {
+      type: 'system',
+      sectionTitle: placeholders.vitalSysTitle || 'Vital System Information',
+      displayFields: ['topology', 'name', 'url', 'target', 'notes'],
+    },
+    envInfo: {
+      type: 'environment',
+      sectionTitle: placeholders.envInfoTitle || 'Environment Information',
+      displayFields: ['topology', 'name', 'publicIP', 'dns', 'availabilityZone'],
+    },
+    contacts: {
+      type: 'contact',
+      sectionTitle: placeholders.contactsTitle || 'Contact Information',
+      displayFields: ['firstName', 'lastName', 'title', 'email', 'businessPhone', 'mobilePhone'],
+    },
+  };
 
-  // Check if the block has the expected structure
-  if (block.querySelector('a')) {
-    serverDataUrl = block.querySelector('a').href;
-  } else {
+  // Get data URLs from block content
+  const links = block.querySelectorAll('a');
+  const dataUrls = {};
+
+  // Check if we have the expected data URLs
+  if (links.length === 0) {
     // eslint-disable-next-line no-console
-    console.error('Server data URL not found in block');
-    block.innerHTML = '<div class="error-message">Configuration error: Server data URL not found.</div>';
+    console.error('No data URLs found in block');
+    block.innerHTML = '<div class="error-message">Configuration error: Data URLs not found.</div>';
     return;
   }
 
+  // Extract URLs from block - expecting one URL for each data source
+  // First URL is for vitalSys
+  dataUrls.vitalSys = links[0].href;
+
+  // Second URL is for envInfo if available
+  if (links.length > 1) {
+    dataUrls.envInfo = links[1].href;
+  }
+
+  // Third URL is for contacts if available
+  if (links.length > 2) {
+    dataUrls.contacts = links[2].href;
+  }
+
   try {
-    // Fetch server data from the JSON endpoint
-    const response = await fetch(serverDataUrl);
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('data-wrapper');
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch server data: ${response.status} ${response.statusText}`);
-    }
+    // Process all data sources and add them to the wrapper
+    const sections = await processAllDataSources(dataUrls, dataConfigs, placeholders);
+    sections.forEach((section) => {
+      wrapper.appendChild(section);
+    });
 
-    const json = await response.json();
-
-    if (!json.data || !Array.isArray(json.data)) {
-      throw new Error('Invalid server data format: expected json.data array');
-    }
-
-    const serversData = json.data;
-
-    if (serversData.length === 0) {
-      block.innerHTML = '<div class="note-message">No server information available.</div>';
-      return;
-    }
-
-    block.innerHTML = serversHtml(placeholders, serversData);
+    block.innerHTML = '';
+    block.appendChild(wrapper);
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Error fetching server data:', error);
-    block.innerHTML = `<div class="error-message">Error loading server details: ${error.message}</div>`;
+    console.error('Error processing data:', error);
+    block.innerHTML = `<div class="error-message">Error processing data: ${error.message}</div>`;
   }
 }
