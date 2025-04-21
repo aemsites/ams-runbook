@@ -1,0 +1,92 @@
+/* Table styling */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+  }
+  
+  .data-table th {
+    background-color: #f5f5f5;
+    text-align: left;
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  .data-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+  }
+  
+  .data-table tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  /* Link styling - for both URLs and emails */
+  .data-table a {
+    color: #06c;
+    text-decoration: none;
+  }
+  
+  .data-table a:hover {
+    text-decoration: underline;
+    color: #049;
+  }
+  
+  /* Email link specific styling if needed */
+  .data-table a[href^="mailto:"] {
+    /* You can add email-specific styles here */
+    display: inline-block;
+  }
+  
+  /* Link icon for external URLs */
+  .data-table a[target="_blank"]::after {
+    content: " ↗"; /* Add a small arrow after external links */
+    font-size: 0.8em;
+    vertical-align: super;
+  }
+  
+  /* Section title */
+  .section-title {
+    margin: 20px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* List inside table cells */
+  .data-table ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .data-table li {
+    margin-bottom: 3px;
+  }
+  
+  /* Error and note messages */
+  .error-message, .note-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+  }
+  
+  .error-message {
+    background-color: #fff3f3;
+    color: #d32f2f;
+    border-left: 4px solid #d32f2f;
+  }
+  
+  .note-message {
+    background-color: #f5f5f5;
+    color: #666;
+    border-left: 4px solid #999;
+  }
+  
+  /* Responsive adjustments for smaller screens */
+  @media (width <= 768px) {
+    .data-table th, 
+    .data-table td {
+      padding: 6px 8px;
+    }
+  }
