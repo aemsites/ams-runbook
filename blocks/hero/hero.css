@@ -13,14 +13,14 @@
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  color: var(--background-color);
+  color: var(--text-color);
 }
 
 .hero p {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  color: var(--background-color);
+  color: var(--text-color);
 }
 
 .hero picture {

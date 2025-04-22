@@ -15,13 +15,16 @@
   --background-color: white;
   --light-color: #f8f8f8;
   --dark-color: #505050;
-  --text-color: #131313;
+  --text-color: #2c2c2c;
   --link-color: #3b63fb;
   --link-hover-color: #1d3ecf;
+  --color-black: black;
+  --color-transparent: transparent;
+  --oldtext-color: #131313;
 
   /* fonts */
-  --body-font-family: roboto, roboto-fallback, sans-serif;
-  --heading-font-family: roboto-condensed, roboto-condensed-fallback, sans-serif;
+  --body-font-family: adobeclean-regular, calibri, sans-serif;
+  --heading-font-family: adobeclean-boldsemicn, calibri-bold, sans-serif;
 
   /* body sizes */
   --body-font-size-m: 22px;
@@ -172,7 +175,7 @@ button {
   display: inline-block;
   max-width: 100%;
   margin: 12px 0;
-  border: 2px solid transparent;
+  border: 2px solid var(--color-black);
   border-radius: 2.4em;
   padding: 0.5em 1.2em;
   font-family: var(--body-font-family);
@@ -181,8 +184,8 @@ button {
   line-height: 1.25;
   text-align: center;
   text-decoration: none;
-  background-color: var(--link-color);
-  color: var(--background-color);
+  background-color: var(--color-transparent);
+  color: var(--copy);
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -193,7 +196,8 @@ a.button:hover,
 a.button:focus,
 button:hover,
 button:focus {
-  background-color: var(--link-hover-color);
+  background-color: var(--color-black);
+  color: var(--background-color);
   cursor: pointer;
 }
 
