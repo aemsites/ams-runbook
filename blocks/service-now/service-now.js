@@ -228,7 +228,7 @@ export default async function decorate(block) {
     contacts: {
       type: 'contact',
       sectionTitle: placeholders.contactsTitle || 'Contact Information',
-      displayFields: ['firstName', 'lastName', 'title', 'email', 'businessPhone', 'mobilePhone'],
+      displayFields: ['firstName', 'lastName', 'title', 'email', 'businessPhone', 'mobilePhone', 'isPartner', 'partnerCompany'],
     },
   };
 
