@@ -33,6 +33,18 @@ const formatValue = (value, fieldName) => {
     return value;
   }
 
+  // Handle phone number fields - format them as clickable tel links
+  if ((fieldName === 'businessPhone' || fieldName === 'mobilePhone') && value) {
+  // Simple phone number validation
+    const phoneRegex = /^\d{11}$/;
+    if (phoneRegex.test(value)) {
+    // Format the phone number as +X (XXX) XXX-XXXX
+      const formattedPhone = `+${value.slice(0, 1)} (${value.slice(1, 4)}) ${value.slice(4, 7)}-${value.slice(7)}`;
+      return `<a href="tel:${value}">${formattedPhone}</a>`;
+    }
+    return value;
+  }
+
   // Handle multiline notes
   if (typeof value === 'string' && value.includes('\n')) {
     const lines = value.split(/\r?\n|\r|\n/g)
@@ -232,19 +244,23 @@ export default async function decorate(block) {
     return;
   }
 
-  // Extract URLs from block - expecting one URL for each data source
-  // First URL is for vitalSys
-  dataUrls.vitalSys = links[0].href;
+  // Extract URLs from block and dynamically match them to dataConfigs
+  links.forEach((link) => {
+    const url = link.href;
+    const linkText = link.textContent.trim().toLowerCase();
 
-  // Second URL is for envInfo if available
-  if (links.length > 1) {
-    dataUrls.envInfo = links[1].href;
-  }
-
-  // Third URL is for contacts if available
-  if (links.length > 2) {
-    dataUrls.contacts = links[2].href;
-  }
+    if (linkText.includes('vital') || linkText.includes('system')) {
+      dataUrls.vitalSys = url;
+    } else if (linkText.includes('environment') || linkText.includes('env')) {
+      dataUrls.envInfo = url;
+    } else if (linkText.includes('contact')) {
+      dataUrls.contacts = url;
+    } else {
+      // Handle unexpected or additional data types
+      // eslint-disable-next-line no-console
+      console.warn(`Unrecognized data type for URL: ${url}`);
+    }
+  });
 
   try {
     const wrapper = document.createElement('div');
