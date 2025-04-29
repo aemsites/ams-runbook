@@ -133,6 +133,40 @@ export function decorateMain(main) {
   decorateBlocks(main);
 }
 
+/** Replaces all instances of "customer_id" in the page content with
+ * the value from meta tag. */
+function replaceCustomerID() {
+  // Get the customer_id from meta tag
+  const metaTag = document.querySelector('meta[name="customer_id"]');
+
+  const customerId = metaTag.getAttribute('content');
+
+  // Create a styled version of the customer ID
+  const styledCustomerId = `<span style="font-style: italic; text-decoration: underline; color: #000072;">${customerId}</span>`;
+
+  // Process all elements with text content
+  const elementsWithText = document.querySelectorAll('body *:not(script):not(style)');
+
+  elementsWithText.forEach((element) => {
+    // Skip elements that have child elements (only process leaf text nodes)
+    if (element.children.length === 0 && element.textContent.includes('customer_id')) {
+      // Create a new container for the HTML content
+      const container = document.createElement('div');
+
+      // Replace the text and set as HTML
+      container.innerHTML = element.innerHTML
+        ? element.innerHTML.replace(/customer_id/g, styledCustomerId)
+        : element.textContent.replace(/customer_id/g, styledCustomerId);
+
+      // Replace the element's content with the new HTML
+      element.innerHTML = container.innerHTML;
+    }
+  });
+}
+
+// Run the function when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', replaceCustomerID);
+
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -180,6 +214,7 @@ function loadDelayed() {
   // eslint-disable-next-line import/no-cycle
   window.setTimeout(() => import('./delayed.js'), 3000);
   // load anything that can be postponed to the latest here
+  replaceCustomerID();
 }
 
 async function loadPage() {
