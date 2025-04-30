@@ -12,6 +12,7 @@ import {
   loadSections,
   loadCSS,
   decorateBlock,
+  getMetadata,
 } from './aem.js';
 
 /**
@@ -119,6 +120,34 @@ function buildAutoBlocks(main) {
   }
 }
 
+export async function getDataByCustomerId() {
+  const customerId = getMetadata('customer_id');
+
+  // Use a more targeted replacement approach
+  const textNodes = [];
+
+  // Recursive function to find text nodes
+  function findTextNodes(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      if (node.nodeValue.includes('{customer_id}')) {
+        textNodes.push(node);
+      }
+    } else {
+      for (let i = 0; i < node.childNodes.length; i += 1) {
+        findTextNodes(node.childNodes[i]);
+      }
+    }
+  }
+
+  // Start from the body to find all relevant text nodes
+  findTextNodes(document.body);
+
+  // Replace text in each node with parentheses around the parameter
+  textNodes.forEach((node) => {
+    node.nodeValue = node.nodeValue.replaceAll('{customer_id}', customerId);
+  });
+}
+
 /**
  * Decorates the main element.
  * @param {Element} main The main element
@@ -126,46 +155,13 @@ function buildAutoBlocks(main) {
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   // hopefully forward compatible button decoration
+  getDataByCustomerId(main);
   decorateButtons(main);
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
   decorateBlocks(main);
 }
-
-/** Replaces all instances of "customer_id" in the page content with
- * the value from meta tag. */
-function replaceCustomerID() {
-  // Get the customer_id from meta tag
-  const metaTag = document.querySelector('meta[name="customer_id"]');
-
-  const customerId = metaTag.getAttribute('content');
-
-  // Create a styled version of the customer ID
-  const styledCustomerId = `<span style="font-style: italic; text-decoration: underline; color: #000072;">${customerId}</span>`;
-
-  // Process all elements with text content
-  const elementsWithText = document.querySelectorAll('body *:not(script):not(style)');
-
-  elementsWithText.forEach((element) => {
-    // Skip elements that have child elements (only process leaf text nodes)
-    if (element.children.length === 0 && element.textContent.includes('customer_id')) {
-      // Create a new container for the HTML content
-      const container = document.createElement('div');
-
-      // Replace the text and set as HTML
-      container.innerHTML = element.innerHTML
-        ? element.innerHTML.replace(/customer_id/g, styledCustomerId)
-        : element.textContent.replace(/customer_id/g, styledCustomerId);
-
-      // Replace the element's content with the new HTML
-      element.innerHTML = container.innerHTML;
-    }
-  });
-}
-
-// Run the function when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', replaceCustomerID);
 
 /**
  * Loads everything needed to get to LCP.
@@ -214,7 +210,6 @@ function loadDelayed() {
   // eslint-disable-next-line import/no-cycle
   window.setTimeout(() => import('./delayed.js'), 3000);
   // load anything that can be postponed to the latest here
-  replaceCustomerID();
 }
 
 async function loadPage() {
