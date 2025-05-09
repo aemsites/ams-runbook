@@ -1,0 +1,72 @@
+.excludes: &excludes
+  - '**/drafts/**'
+  - '**/images/**'
+  - '**/icons/**'
+  - '**/test/**'
+  - '**/fragments/**'
+
+version: 1
+indices:
+  default:
+    include:
+      - /**
+    exclude:
+      - '**/drafts/**'
+      - '**/images/**'
+      - '**/icons/**'
+      - '**/fragments/**'
+      - '**/user_area/**'
+      - /tags
+      - /nav
+      - /footer
+    target: /query-index.json
+    properties:
+      title:
+        select: head > meta[property="og:title"]
+        value: attribute(el, "content")
+      image:
+        select: head > meta[property="og:image"]
+        value: match(attribute(el, "content"), "https:\/\/[^/]+(/.*)")
+      description:
+        select: head > meta[name="description"]
+        value: attribute(el, "content")
+      date:
+        select: head > meta[name="date"]
+        value: attribute(el, "content")
+      lastModified:
+        select: none
+        value: parseTimestamp(headers["last-modified"], "ddd, DD MMM YYYY hh:mm:ss GMT")
+      tags:
+        select: head > meta[name="article:tag"]
+        value: attribute(el, "content")
+
+  meeting-minutes:
+    include:
+      - /meeting-minutes/**
+    exclude: *excludes
+    target: /meeting-minutes/query-index.json
+    properties:
+      title:
+        select: head > meta[name="og:title"]
+        value: attribute(el, "content")
+      description:
+        select: head > meta[name="description"]
+        value: attribute(el, "content")
+      image:
+        select: head > meta[property="og:image"]
+        value: match(attribute(el, "content"), "https:\/\/[^/]+(/.*)")
+      lastModified:
+        select: none
+        value: parseTimestamp(headers["last-modified"], "ddd, DD MMM YYYY hh:mm:ss GMT")
+      date:
+        select: head > meta[name="date"]
+        value: attribute(el, "content")
+      meeting-date:
+        select: head > meta[name="meeting-date"]
+        value: attribute(el, "content")
+      meeting-type:
+        select: head > meta[name="meeting-type"]
+        value: attribute(el, "content")
+      tags:
+        select: head > meta[name="article:tag"]
+        value: attribute(el, "content")
