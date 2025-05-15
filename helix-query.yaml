@@ -59,13 +59,10 @@ indices:
         select: none
         value: parseTimestamp(headers["last-modified"], "ddd, DD MMM YYYY hh:mm:ss GMT")
       date:
-        select: none
-        value: parseTimestamp(headers["date"], "ddd, DD MMM YYYY hh:mm:ss GMT")
-      meeting-date:
-        select: head > meta[name="meeting-date"]
+        select: head > meta[name="date"]
         value: attribute(el, "content")
-      meeting-type:
-        select: head > meta[name="meeting-type"]
+      category:
+        select: head > meta[name="category"]
         value: attribute(el, "content")
       tags:
         select: head > meta[name="article:tag"]
