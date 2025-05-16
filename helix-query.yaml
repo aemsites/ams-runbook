@@ -64,6 +64,9 @@ indices:
       category:
         select: head > meta[name="category"]
         value: attribute(el, "content")
+      attendees:
+        select: head > meta[name="attendees"]
+        value: attribute(el, "content")
       tags:
         select: head > meta[name="article:tag"]
         value: attribute(el, "content")
