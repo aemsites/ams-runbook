@@ -52,6 +52,7 @@ indices:
         value: parseTimestamp(headers["last-modified"], "ddd, DD MMM YYYY hh:mm:ss GMT")
       date:
         select: head > meta[name="date"]
+        value: attribute(el, "content")
         value: parseTimestamp(attribute(el, "content"), "ddd, DD MMM YYYY hh:mm:ss GMT")
       category:
         select: head > meta[name="category"]
@@ -62,3 +63,4 @@ indices:
       tags:
         select: head > meta[name="article:tag"]
         value: attribute(el, "content")
+        

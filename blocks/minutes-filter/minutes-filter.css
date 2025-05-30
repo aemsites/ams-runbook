@@ -1,0 +1,104 @@
+.minutes-filter filter select {
+    font-size: var(--body-font-size-xs);
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 0 50px 0 20px;
+    margin-bottom: 3%;
+    color: var(--dark-gray);
+    background-color: white;
+    height: 40px;
+    cursor: pointer;
+    border: 1px solid var(--dark-gray);
+    background-image: url("/icons/down.svg");
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    appearance: none;
+}
+
+/* Create grid layout for minute cards */
+.minutes-filter #minutes-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.minutes-filter .minute-cards {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 0; /* Remove bottom margin since grid gap handles spacing */
+  border-radius: 6px;
+}
+
+/* Style the filter dropdowns */
+.minutes-filter .filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+}
+
+.minutes-filter .filters select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+}
+
+/* Optional: Headings or typography tweaks */
+.minutes-filter .minute-cards h3 {
+  margin: 0 0 0.25rem;
+}
+
+.minutes-filter .minute-cards h3:hover {
+  text-decoration: underline;
+}
+
+/* Responsive design for smaller screens */
+@media (width <= 992px) {
+  .minutes-filter #minutes-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width <= 576px) {
+  .minutes-filter #minutes-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.minutes-filter .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.minutes-filter .pagination button {
+  background-color: white;
+  border: 1px solid var(--dark-gray);
+  color: var(--dark-gray);
+  padding: 8px 16px;
+  margin: 0 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: var(--body-font-size-xs);
+}
+
+.minutes-filter .pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.minutes-filter .pagination button:hover:not([disabled]) {
+  background-color: var(--dark-gray);
+  color: white;
+}
+
+.minutes-filter .pagination #page-info {
+  font-size: var(--body-font-size-s);
+  margin: 0 10px;
+}
