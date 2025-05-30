@@ -75,6 +75,7 @@ main > .section > .tabs-wrapper {
   margin-top: -1px;
   padding: 24px;
   overflow: auto;
+  height: 100vh;
 }
 
 /* This CSS rule ensures panels are hidden when aria-hidden is true */

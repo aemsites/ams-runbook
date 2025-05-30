@@ -120,19 +120,39 @@ function buildAutoBlocks(main) {
   }
 }
 
-export async function getDataByCustomerId() {
-  const customerId = getMetadata('customer_id');
+export async function processPageMetadata() {
+  // Define all metadata keys we want to process
+  const metadataKeys = ['customer_id', 'title', 'date', 'attendees'];
 
-  // Use a more targeted replacement approach
+  // Create a mapping of metadata keys to their values
+  const metadataValues = {};
+
+  // Use the existing getMetadata function that's defined elsewhere
+  // Special case for title: use og:title property instead of name
+  metadataValues.title = getMetadata('og:title');
+
+  // For other keys, use standard metadata
+  metadataKeys.forEach((key) => {
+    if (key !== 'title') { // Skip title as we've already handled it
+      metadataValues[key] = getMetadata(key);
+    }
+  });
+
+  // Find and process all text nodes containing any of our placeholders
   const textNodes = [];
 
-  // Recursive function to find text nodes
+  // Recursive function to find text nodes with placeholders
   function findTextNodes(node) {
     if (node.nodeType === Node.TEXT_NODE) {
-      if (node.nodeValue.includes('{customer_id}')) {
+      // Check if this text node contains any of our placeholders
+      const nodeText = node.nodeValue;
+      const hasPlaceholder = metadataKeys.some((key) => nodeText.includes(`{${key}}`));
+
+      if (hasPlaceholder) {
         textNodes.push(node);
       }
     } else {
+      // Process child nodes
       for (let i = 0; i < node.childNodes.length; i += 1) {
         findTextNodes(node.childNodes[i]);
       }
@@ -142,9 +162,19 @@ export async function getDataByCustomerId() {
   // Start from the body to find all relevant text nodes
   findTextNodes(document.body);
 
-  // Replace text in each node with parentheses around the parameter
+  // Replace all placeholders in each text node
   textNodes.forEach((node) => {
-    node.nodeValue = node.nodeValue.replaceAll('{customer_id}', customerId);
+    let updatedText = node.nodeValue;
+
+    // Replace each placeholder with its corresponding value
+    metadataKeys.forEach((key) => {
+      const placeholder = `{${key}}`;
+      if (updatedText.includes(placeholder)) {
+        updatedText = updatedText.replaceAll(placeholder, metadataValues[key] || '');
+      }
+    });
+
+    node.nodeValue = updatedText;
   });
 }
 
@@ -155,7 +185,7 @@ export async function getDataByCustomerId() {
 // eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   // hopefully forward compatible button decoration
-  getDataByCustomerId(main);
+  processPageMetadata(main);
   decorateButtons(main);
   decorateIcons(main);
   buildAutoBlocks(main);

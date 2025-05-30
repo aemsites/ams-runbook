@@ -1,10 +1,3 @@
-.excludes: &excludes
-  - '**/drafts/**'
-  - '**/images/**'
-  - '**/icons/**'
-  - '**/test/**'
-  - '**/fragments/**'
-
 version: 1
 indices:
   default:
@@ -43,11 +36,10 @@ indices:
   meeting-minutes:
     include:
       - /meeting-minutes/**
-    exclude: *excludes
     target: /meeting-minutes/query-index.json
     properties:
       title:
-        select: head > meta[name="og:title"]
+        select: head > meta[property="og:title"]
         value: attribute(el, "content")
       description:
         select: head > meta[name="description"]
@@ -59,14 +51,15 @@ indices:
         select: none
         value: parseTimestamp(headers["last-modified"], "ddd, DD MMM YYYY hh:mm:ss GMT")
       date:
-        select: none
-        value: parseTimestamp(headers["date"], "ddd, DD MMM YYYY hh:mm:ss GMT")
-      meeting-date:
-        select: head > meta[name="meeting-date"]
+        select: head > meta[name="date"]
         value: attribute(el, "content")
-      meeting-type:
-        select: head > meta[name="meeting-type"]
+      category:
+        select: head > meta[name="category"]
+        value: attribute(el, "content")
+      attendees:
+        select: head > meta[name="attendees"]
         value: attribute(el, "content")
       tags:
         select: head > meta[name="article:tag"]
         value: attribute(el, "content")
+        

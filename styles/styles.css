@@ -132,6 +132,10 @@ blockquote {
   margin-bottom: 0.25em;
 }
 
+.italic-text {
+  font-style: italic;
+}
+
 code,
 pre {
   font-size: var(--body-font-size-s);
