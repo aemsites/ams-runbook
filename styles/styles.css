@@ -218,6 +218,11 @@ button.secondary {
   color: var(--text-color);
 }
 
+p.button-container {
+    display: flex;
+    justify-content: center;
+}
+
 main img {
   max-width: 100%;
   width: auto;
