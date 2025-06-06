@@ -29,5 +29,44 @@
   .columns > div > div {
     flex: 1;
     order: unset;
+    padding: 0.5rem;
   }
 }
+
+ul.meeting-list {
+  list-style: none;
+  padding: 0 0 0 2rem;
+  margin: 0;
+}
+
+ul.meeting-list li {
+  margin-bottom: 0.5em;
+}
+
+ul.meeting-list li a {
+  display: grid;
+  grid-template-columns: 10ch 1fr;
+  column-gap: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  align-items: start;
+}
+
+.meeting-date {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.meeting-description {
+  text-align: left;
+  line-height: 1.4;
+}
+
+ul.meeting-list li a:hover {
+  border-bottom: 1px solid var(--background-color);
+  color: blue;
+  text-decoration: underline;
+  font-style: italic;
+  font-weight: bold;
+}
+
