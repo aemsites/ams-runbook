@@ -1,5 +1,5 @@
-# Your Project's Title...
-Your project's description...
+# AEM Edge Delivery Services Runbook
+Practical guidance for operating and maintaining AEM Edge Delivery Services sites.
 
 ## Environments
 - Preview: https://main--ams-runbook--aemsites.aem.page/
