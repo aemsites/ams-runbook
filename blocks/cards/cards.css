@@ -4,7 +4,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(257px, 1fr));
-  grid-gap: 24px;
+  gap: 24px 16px;
 }
 
 .cards.resources.block > ul {
@@ -13,24 +13,90 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-gap: 24px;
+  gap: 24px 16px;
 }
 
 .cards > ul > li {
-  border: 1px solid #dadada;
-  background-color: var(--background-color);
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #1e3010;
+  color: white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 16%);
+}
+
+.cards .cards-card-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
 }
 
 .cards .cards-card-body {
-  margin: 16px;
+  position: relative;
+  z-index: 1;
+  min-height: 150px;
+  box-sizing: border-box;
+  margin: -72px 0 0;
+  padding: 17px 56px 17px 16px;
+  border-radius: 12px 12px 0 0;
+  background: rgb(15 27 17 / 78%);
+  backdrop-filter: blur(14px);
+}
+
+.cards .cards-card-body h3,
+.cards .cards-card-body h4,
+.cards .cards-card-body h5,
+.cards .cards-card-body h6 {
+  margin: 0;
+  color: inherit;
+  font-family: var(--body-font-family);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cards .cards-card-body p {
+  margin: 22px 0 0;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.cards .cards-card-body::after {
+  position: absolute;
+  top: 16px;
+  right: 17px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  content: '→';
+  place-items: center;
+  background: #fff;
+  color: #1264b0;
+  font-size: 25px;
+  line-height: 1;
 }
 
 .cards .cards-card-image {
   line-height: 0;
+  height: 220px;
+  min-height: 220px;
+  background:
+    linear-gradient(135deg, rgb(46 76 28 / 90%), rgb(15 27 17 / 90%)),
+    linear-gradient(45deg, #759f50, #1e3010);
 }
 
 .cards > ul > li img {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 100%;
   object-fit: cover;
+}
+
+@media (width < 600px) {
+  .cards > ul,
+  .cards.resources.block > ul {
+    grid-template-columns: 1fr;
+  }
 }
