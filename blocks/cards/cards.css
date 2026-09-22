@@ -25,13 +25,23 @@
   box-shadow: 0 1px 3px rgb(0 0 0 / 16%);
 }
 
+.cards .cards-card-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
 .cards .cards-card-body {
   position: relative;
-  min-height: 118px;
+  z-index: 1;
+  min-height: 150px;
   box-sizing: border-box;
-  margin: 0;
+  margin: -72px 0 0;
   padding: 17px 56px 17px 16px;
-  background: linear-gradient(180deg, rgb(15 27 17 / 66%) 0%, #1e3010 78%);
+  border-radius: 12px 12px 0 0;
+  background: rgb(15 27 17 / 78%);
+  backdrop-filter: blur(14px);
 }
 
 .cards .cards-card-body h3,
@@ -71,7 +81,11 @@
 
 .cards .cards-card-image {
   line-height: 0;
-  height: 200px;
+  height: 220px;
+  min-height: 220px;
+  background:
+    linear-gradient(135deg, rgb(46 76 28 / 90%), rgb(15 27 17 / 90%)),
+    linear-gradient(45deg, #759f50, #1e3010);
 }
 
 .cards > ul > li img {
